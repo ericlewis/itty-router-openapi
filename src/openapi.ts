@@ -1,7 +1,7 @@
 import { getReDocUI, getSwaggerUI } from './ui'
-import { Router } from 'itty-router'
+import { Router, IRequest } from 'itty-router'
 import { getFormatedParameters, Query } from './parameters'
-import { OpenAPIRouterSchema, OpenAPISchema, RouterOptions } from './types'
+import { OpenAPIRouterSchema, OpenAPISchema, RouterOptions, SchemaVersion, AuthType, APIType } from './types'
 
 export function OpenAPIRouter(options?: RouterOptions): OpenAPIRouterSchema {
   const OpenAPIPaths: Record<string, Record<string, any>> = {}
@@ -145,6 +145,37 @@ export function OpenAPIRouter(options?: RouterOptions): OpenAPIRouterSchema {
           },
           status: 200,
         })
+      })
+    }
+
+    if (options?.aiPlugin !== null) {
+      router.get('/.well-known/ai-plugin.json', (request: IRequest) => {
+        const plugin = options?.aiPlugin
+        return new Response(
+          JSON.stringify({
+            ...plugin,
+            schema_version: plugin?.schema_version ?? SchemaVersion.V1,
+            auth: plugin?.auth ?? {
+              type: AuthType.NONE,
+            },
+            api: plugin?.api ?? {
+              type: APIType.OPENAPI,
+              url: `https://${request.headers.get('host')}${options?.openapi_url ?? '/openapi.json'}`,
+              has_user_authentication: false,
+            },
+            logo_url: plugin?.legal_info_url ?? `https://${request.headers.get('host')}/logo.png`,
+            name_for_human: plugin?.human?.name ?? plugin?.name_for_human,
+            description_for_human: plugin?.human?.description ?? plugin?.description_for_human,
+            description_for_model: plugin?.model?.description ?? plugin?.description_for_model,
+            name_for_model: plugin?.model?.name ?? plugin?.name_for_model,
+          }),
+          {
+            headers: {
+              'content-type': 'application/json;charset=UTF-8',
+            },
+            status: 200,
+          }
+        )
       })
     }
   }

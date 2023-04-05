@@ -1,4 +1,4 @@
-import { OpenAPIRouteSchema, OpenAPISchema, RouteValidated } from './types'
+import { OpenAPIRouteSchema, OpenAPISchema, RouteValidated, OpenAPIRouterSchema } from './types'
 import { ApiException } from './exceptions'
 import { Body, extractParameter, extractQueryParameters, getFormatedParameters, Parameter, Resp } from './parameters'
 
@@ -136,4 +136,8 @@ export class OpenAPIRoute implements OpenAPIRouteSchema {
   handle(...args: any[]): Promise<Response | Record<string, any>> {
     throw new Error('Method not implemented.')
   }
+}
+
+export declare class AIPluginRoute extends OpenAPIRoute {
+  static register(router: OpenAPIRouterSchema): void
 }
